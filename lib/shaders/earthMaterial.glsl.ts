@@ -25,7 +25,6 @@ precision highp float;
 
 uniform sampler2D u_dayMap;
 uniform sampler2D u_nightMap;
-uniform sampler2D u_specMap;
 uniform vec3 u_sunDirection;
 uniform float u_time;
 uniform float u_altitude;
@@ -38,7 +37,11 @@ varying float vSunDot;
 void main() {
   vec3 dayColor = texture2D(u_dayMap, vUv).rgb;
   vec3 nightColor = texture2D(u_nightMap, vUv).rgb;
-  float specMask = texture2D(u_specMap, vUv).r;
+
+  // Approximate ocean mask from day map: ocean is dark and blue-dominant
+  float lum = dot(dayColor, vec3(0.299, 0.587, 0.114));
+  float blueDom = step(dayColor.r, dayColor.b * 0.9) * step(dayColor.g, dayColor.b * 1.1);
+  float specMask = blueDom * smoothstep(0.35, 0.15, lum);
 
   float terminatorBlend = smoothstep(-0.10, 0.12, vSunDot);
 

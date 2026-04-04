@@ -57,9 +57,10 @@ export default function CameraRig() {
     const scrollProgress = useUniverse.getState().scrollProgress;
     const bootComplete = useUniverse.getState().bootComplete;
     const skillsActive = useUniverse.getState().skillsSectionActive;
+    const timelineActive = useUniverse.getState().timelineSectionActive;
 
-    // Yield control to SkillsPlanets during skills section
-    if (skillsActive) return;
+    // Yield control to section-specific camera controllers
+    if (skillsActive || timelineActive) return;
 
     // Smooth interpolation to avoid jitter
     smoothProgress.current += (scrollProgress - smoothProgress.current) * 0.05;

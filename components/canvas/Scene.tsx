@@ -7,6 +7,7 @@ import Effects from "./Effects";
 
 import ConstellationField from "./ConstellationField";
 import SkillsPlanets from "./SkillsPlanets";
+import TimelineConstellation from "./TimelineConstellation";
 
 export default function Scene() {
   return (
@@ -38,6 +39,9 @@ export default function Scene() {
 
         {/* Skills section: 3 planets + moons */}
         <SkillsPlanets />
+
+        {/* Timeline section: constellation star map */}
+        <TimelineConstellation />
 
         {/* Scroll-driven camera */}
         <CameraRig />

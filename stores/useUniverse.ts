@@ -1,0 +1,39 @@
+import { create } from "zustand";
+
+interface UniverseState {
+  /** Scroll progress from 0 (top) to 1 (bottom) */
+  scrollProgress: number;
+
+  /** Whether the boot sequence has completed */
+  bootComplete: boolean;
+
+  /** Currently active section name */
+  activeSection: string;
+
+  /** Lenis instance reference for start/stop control */
+  lenisRef: { stop: () => void; start: () => void } | null;
+
+  /** Whether skills section controls the camera */
+  skillsSectionActive: boolean;
+
+  // Actions
+  setScrollProgress: (progress: number) => void;
+  setBootComplete: (complete: boolean) => void;
+  setActiveSection: (section: string) => void;
+  setLenisRef: (lenis: { stop: () => void; start: () => void } | null) => void;
+  setSkillsSectionActive: (active: boolean) => void;
+}
+
+export const useUniverse = create<UniverseState>((set) => ({
+  scrollProgress: 0,
+  bootComplete: false,
+  activeSection: "hero",
+  lenisRef: null,
+  skillsSectionActive: false,
+
+  setScrollProgress: (progress) => set({ scrollProgress: progress }),
+  setBootComplete: (complete) => set({ bootComplete: complete }),
+  setActiveSection: (section) => set({ activeSection: section }),
+  setLenisRef: (lenis) => set({ lenisRef: lenis }),
+  setSkillsSectionActive: (active) => set({ skillsSectionActive: active }),
+}));

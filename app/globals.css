@@ -1,26 +1,207 @@
 @import "tailwindcss";
 
+/* ─── Universe Design System ─── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Scene */
+  --void: #000005;
+
+  /* Accents */
+  --lime: #C8FF00;
+  --cyan: #00E5FF;
+  --accent: #00E5FF;
+  --coral: #FF3D00;
+  --amber: #FFB800;
+
+  /* Text */
+  --text-primary: #EEEEF0;
+  --text-secondary: #8888A0;
+  --text-muted: #44445A;
+
+  /* Glow shadows */
+  --glow-lime: 0 0 20px rgba(200, 255, 0, 0.4), 0 0 60px rgba(200, 255, 0, 0.15);
+  --glow-cyan: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
+  --glow-accent: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-void: var(--void);
+  --color-lime: var(--lime);
+  --color-cyan: var(--cyan);
+  --color-accent: var(--accent);
+  --color-coral: var(--coral);
+  --color-amber: var(--amber);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --font-sans: var(--font-space-grotesk);
+  --font-display: var(--font-clash-display);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base ─── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--void);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ─── Selection ─── */
+::selection {
+  background: rgba(200, 255, 0, 0.25);
+  color: var(--text-primary);
+}
+
+/* ─── Scrollbar (hidden — Lenis manages scroll) ─── */
+::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+html {
+  scrollbar-width: none;
+}
+
+/* ─── Glass Panel ─── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+}
+
+/* ─── Scroll Spacer ─── */
+.scroll-spacer {
+  width: 100%;
+  pointer-events: none;
+}
+
+/* ─── Fixed Canvas Layer ─── */
+.canvas-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
+/* ─── Overlay Layer ─── */
+.overlay-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.overlay-layer > * {
+  pointer-events: auto;
+}
+
+/* ─── Boot Overlay ─── */
+.boot-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 3rem;
+  font-family: var(--font-mono), monospace;
+  overflow: hidden;
+}
+
+/* ─── Pulse Animation ─── */
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ─── Bounce Animation ─── */
+@keyframes bounce-scroll {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+.bounce-scroll {
+  animation: bounce-scroll 2s ease-in-out infinite;
+}
+
+/* ─── Glitch Effect (used in boot) ─── */
+@keyframes glitch {
+  0% {
+    transform: translate(0) skew(0deg);
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    transform: translate(-3px, 2px) skew(2deg);
+    filter: hue-rotate(90deg) blur(1px);
+  }
+  40% {
+    transform: translate(3px, -2px) skew(-1deg);
+    filter: hue-rotate(180deg) blur(2px);
+  }
+  60% {
+    transform: translate(-2px, 1px) skew(1deg);
+    filter: hue-rotate(270deg) blur(1px);
+  }
+  80% {
+    transform: translate(2px, -1px) skew(-2deg);
+    filter: hue-rotate(360deg);
+  }
+  100% {
+    transform: translate(0) skew(0deg);
+    filter: hue-rotate(0deg);
+  }
+}
+
+.glitch-active {
+  animation: glitch 0.4s ease-in-out;
+}
+
+/* ─── Radar Ping (About section) ─── */
+@keyframes radar-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+

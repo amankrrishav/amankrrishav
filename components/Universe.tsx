@@ -7,6 +7,7 @@ import AboutOverlay from "@/components/overlays/AboutOverlay";
 import ShootingStarsOverlay from "@/components/overlays/ShootingStarsOverlay";
 import SkillsOverlay from "@/components/overlays/SkillsOverlay";
 import TimelineOverlay from "@/components/overlays/TimelineOverlay";
+import PassionsOverlay from "@/components/overlays/PassionsOverlay";
 
 /**
  * Universe — the main orchestrator component.
@@ -35,6 +36,7 @@ export default function Universe() {
       <AboutOverlay />
       <SkillsOverlay />
       <TimelineOverlay />
+      <PassionsOverlay />
 
       {/* Boot Sequence — highest z-index, covers everything during boot */}
       <BootSequence />

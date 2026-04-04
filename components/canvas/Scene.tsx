@@ -8,6 +8,7 @@ import Effects from "./Effects";
 import ConstellationField from "./ConstellationField";
 import SkillsPlanets from "./SkillsPlanets";
 import TimelineConstellation from "./TimelineConstellation";
+import PassionsPhenomena from "./PassionsPhenomena";
 
 export default function Scene() {
   return (
@@ -42,6 +43,9 @@ export default function Scene() {
 
         {/* Timeline section: constellation star map */}
         <TimelineConstellation />
+
+        {/* Passions section: 6 cosmic shader phenomena */}
+        <PassionsPhenomena />
 
         {/* Scroll-driven camera */}
         <CameraRig />

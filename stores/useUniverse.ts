@@ -34,6 +34,12 @@ interface UniverseState {
   /** Set of star IDs currently illuminated by scroll progress */
   illuminatedStarIds: Set<string>;
 
+  /** Whether passions section controls the camera */
+  passionsSectionActive: boolean;
+
+  /** Currently active phenomenon index (0–5) */
+  activePhenomenonIdx: number;
+
   // Actions
   setScrollProgress: (progress: number) => void;
   setBootComplete: (complete: boolean) => void;
@@ -45,6 +51,8 @@ interface UniverseState {
   setStarScreenPos: (id: string, pos: StarScreenPos) => void;
   setBatchStarScreenPos: (positions: Record<string, StarScreenPos>) => void;
   setIlluminatedStarIds: (ids: Set<string>) => void;
+  setPassionsSectionActive: (active: boolean) => void;
+  setActivePhenomenonIdx: (idx: number) => void;
 }
 
 export const useUniverse = create<UniverseState>((set) => ({
@@ -57,6 +65,8 @@ export const useUniverse = create<UniverseState>((set) => ({
   hoveredStarId: null,
   starScreenPositions: {},
   illuminatedStarIds: new Set<string>(),
+  passionsSectionActive: false,
+  activePhenomenonIdx: 0,
 
   setScrollProgress: (progress) => set({ scrollProgress: progress }),
   setBootComplete: (complete) => set({ bootComplete: complete }),
@@ -72,4 +82,6 @@ export const useUniverse = create<UniverseState>((set) => ({
   setBatchStarScreenPos: (positions) =>
     set({ starScreenPositions: positions }),
   setIlluminatedStarIds: (ids) => set({ illuminatedStarIds: ids }),
+  setPassionsSectionActive: (active) => set({ passionsSectionActive: active }),
+  setActivePhenomenonIdx: (idx) => set({ activePhenomenonIdx: idx }),
 }));

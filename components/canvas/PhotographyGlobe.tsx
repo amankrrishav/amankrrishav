@@ -4,7 +4,6 @@
 
 import { useRef, useMemo, useEffect, Suspense } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useUniverse } from "@/stores/useUniverse";
 import { INDIA_PINS, latLngToVec3 } from "@/content/photography";
@@ -87,26 +86,18 @@ function EarthSystem() {
   const dotTex = useMemo(() => makeDotTexture(), []);
   const ringTex = useMemo(() => makeRingTexture(), []);
 
-  // Load NASA textures (3 only — spec is computed in shader from day map luminance)
-  const [dayMap, nightMap, cloudMap] = useTexture([
-    "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x5400x2700.jpg",
-    "https://eoimages.gsfc.nasa.gov/images/imagerecords/79000/79765/dnb_land_ocean_ice.2012.3600x1800.jpg",
-    "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
-  ]);
-
+  // Earth custom shader material — fully procedural, no textures needed
   const earthMat = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: earthVertexShader,
       fragmentShader: earthFragmentShader,
       uniforms: {
-        u_dayMap: { value: dayMap },
-        u_nightMap: { value: nightMap },
         u_sunDirection: { value: new THREE.Vector3(1, 0.3, 0.5).normalize() },
         u_time: { value: 0 },
         u_altitude: { value: 1.0 },
       },
     });
-  }, [dayMap, nightMap]);
+  }, []);
 
   // Atmosphere materials
   const atmoOuter = useMemo(() => new THREE.ShaderMaterial({
@@ -348,17 +339,16 @@ function EarthSystem() {
         <primitive object={earthMat} attach="material" />
       </mesh>
 
-      {/* Clouds */}
+      {/* Clouds — procedural translucent shell */}
       <mesh ref={cloudRef} rotation-z={TILT}>
         <sphereGeometry args={[1.018, 64, 64]} />
         <meshStandardMaterial
           ref={cloudMat}
-          map={cloudMap}
-          alphaMap={cloudMap}
           transparent
           depthWrite={false}
           color="#ffffff"
           roughness={1}
+          opacity={0.15}
         />
       </mesh>
 

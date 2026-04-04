@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { PhotoPin } from "@/content/photography";
 
 interface StarScreenPos {
   x: number;
@@ -40,6 +41,16 @@ interface UniverseState {
   /** Currently active phenomenon index (0–5) */
   activePhenomenonIdx: number;
 
+  /** Photography section state */
+  photographyActive: boolean;
+  photographyDiveActive: boolean;
+  photographyGalleryOpen: boolean;
+  diveReversing: boolean;
+  activePinId: string | null;
+  hoveredPinId: string | null;
+  dynamicPins: PhotoPin[];
+  warpIntensity: number;
+
   // Actions
   setScrollProgress: (progress: number) => void;
   setBootComplete: (complete: boolean) => void;
@@ -53,6 +64,14 @@ interface UniverseState {
   setIlluminatedStarIds: (ids: Set<string>) => void;
   setPassionsSectionActive: (active: boolean) => void;
   setActivePhenomenonIdx: (idx: number) => void;
+  setPhotographyActive: (active: boolean) => void;
+  setPhotographyDiveActive: (active: boolean) => void;
+  setPhotographyGalleryOpen: (open: boolean) => void;
+  setDiveReversing: (reversing: boolean) => void;
+  setActivePinId: (id: string | null) => void;
+  setHoveredPinId: (id: string | null) => void;
+  addPhotographyPin: (pin: PhotoPin) => void;
+  setWarpIntensity: (v: number) => void;
 }
 
 export const useUniverse = create<UniverseState>((set) => ({
@@ -67,6 +86,14 @@ export const useUniverse = create<UniverseState>((set) => ({
   illuminatedStarIds: new Set<string>(),
   passionsSectionActive: false,
   activePhenomenonIdx: 0,
+  photographyActive: false,
+  photographyDiveActive: false,
+  photographyGalleryOpen: false,
+  diveReversing: false,
+  activePinId: null,
+  hoveredPinId: null,
+  dynamicPins: [],
+  warpIntensity: 0,
 
   setScrollProgress: (progress) => set({ scrollProgress: progress }),
   setBootComplete: (complete) => set({ bootComplete: complete }),
@@ -84,4 +111,12 @@ export const useUniverse = create<UniverseState>((set) => ({
   setIlluminatedStarIds: (ids) => set({ illuminatedStarIds: ids }),
   setPassionsSectionActive: (active) => set({ passionsSectionActive: active }),
   setActivePhenomenonIdx: (idx) => set({ activePhenomenonIdx: idx }),
+  setPhotographyActive: (active) => set({ photographyActive: active }),
+  setPhotographyDiveActive: (active) => set({ photographyDiveActive: active }),
+  setPhotographyGalleryOpen: (open) => set({ photographyGalleryOpen: open }),
+  setDiveReversing: (reversing) => set({ diveReversing: reversing }),
+  setActivePinId: (id) => set({ activePinId: id }),
+  setHoveredPinId: (id) => set({ hoveredPinId: id }),
+  addPhotographyPin: (pin) => set((state) => ({ dynamicPins: [...state.dynamicPins, pin] })),
+  setWarpIntensity: (v) => set({ warpIntensity: v }),
 }));

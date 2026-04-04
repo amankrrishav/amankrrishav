@@ -59,9 +59,10 @@ export default function CameraRig() {
     const skillsActive = useUniverse.getState().skillsSectionActive;
     const timelineActive = useUniverse.getState().timelineSectionActive;
     const passionsActive = useUniverse.getState().passionsSectionActive;
+    const photographyActive = useUniverse.getState().photographyActive;
 
     // Yield control to section-specific camera controllers
-    if (skillsActive || timelineActive || passionsActive) return;
+    if (skillsActive || timelineActive || passionsActive || photographyActive) return;
 
     // Smooth interpolation to avoid jitter
     smoothProgress.current += (scrollProgress - smoothProgress.current) * 0.05;

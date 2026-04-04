@@ -9,6 +9,7 @@ import ConstellationField from "./ConstellationField";
 import SkillsPlanets from "./SkillsPlanets";
 import TimelineConstellation from "./TimelineConstellation";
 import PassionsPhenomena from "./PassionsPhenomena";
+import PhotographyGlobe from "./PhotographyGlobe";
 
 export default function Scene() {
   return (
@@ -46,6 +47,9 @@ export default function Scene() {
 
         {/* Passions section: 6 cosmic shader phenomena */}
         <PassionsPhenomena />
+
+        {/* Photography section: 3D Earth globe */}
+        <PhotographyGlobe />
 
         {/* Scroll-driven camera */}
         <CameraRig />

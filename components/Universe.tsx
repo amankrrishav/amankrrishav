@@ -8,6 +8,7 @@ import ShootingStarsOverlay from "@/components/overlays/ShootingStarsOverlay";
 import SkillsOverlay from "@/components/overlays/SkillsOverlay";
 import TimelineOverlay from "@/components/overlays/TimelineOverlay";
 import PassionsOverlay from "@/components/overlays/PassionsOverlay";
+import PhotographyOverlay from "@/components/overlays/PhotographyOverlay";
 
 /**
  * Universe — the main orchestrator component.
@@ -23,7 +24,7 @@ export default function Universe() {
   return (
     <>
       {/* Scroll spacer — creates the scrollable height */}
-      <div className="scroll-spacer" style={{ height: "2000vh" }} />
+      <div className="scroll-spacer" style={{ height: "2500vh" }} />
 
       {/* 3D Canvas Layer — fixed fullscreen */}
       <Scene />
@@ -37,6 +38,7 @@ export default function Universe() {
       <SkillsOverlay />
       <TimelineOverlay />
       <PassionsOverlay />
+      <PhotographyOverlay />
 
       {/* Boot Sequence — highest z-index, covers everything during boot */}
       <BootSequence />

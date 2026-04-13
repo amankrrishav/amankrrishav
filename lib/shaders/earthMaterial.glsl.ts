@@ -1,21 +1,25 @@
-// ─── SECTION BOUNDARY ──────────────────────
-// lib/shaders/earthMaterial.glsl.ts — Fully procedural Earth (no textures)
+// ─── lib/shaders/earthMaterial.glsl.ts ──────────────────────
+// Texture-based Earth shader for altis.to-grade visual quality.
+// Uses NASA Blue Marble day + city lights night textures.
+// Ocean mask derived from day texture luminance (no external spec map — CORS).
 
 export const earthVertexShader = /* glsl */ `
-varying vec2 vUv;
-varying vec3 vNormal;
-varying vec3 vWorldPosition;
+varying vec2  vUv;
+varying vec3  vNormal;
+varying vec3  vWorldPosition;
 varying float vSunDot;
 
 uniform vec3 u_sunDirection;
 
 void main() {
   vUv = uv;
-  vNormal = normalize(normalMatrix * normal);
-  vec4 worldPos = modelMatrix * vec4(position, 1.0);
+  vec4 worldPos  = modelMatrix * vec4(position, 1.0);
   vWorldPosition = worldPos.xyz;
-  vec3 worldNormal = normalize(mat3(modelMatrix) * normal);
-  vSunDot = dot(worldNormal, u_sunDirection);
+  vNormal        = normalize(normalMatrix * normal);
+  vSunDot        = dot(
+    normalize(mat3(modelMatrix) * normal),
+    normalize(u_sunDirection)
+  );
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
@@ -23,101 +27,74 @@ void main() {
 export const earthFragmentShader = /* glsl */ `
 precision highp float;
 
-uniform vec3 u_sunDirection;
-uniform float u_time;
-uniform float u_altitude;
+uniform sampler2D u_dayMap;
+uniform sampler2D u_nightMap;
+uniform vec3      u_sunDirection;
+uniform vec3      u_cameraPosition;
+uniform float     u_time;
+uniform float     u_altitude;
 
-varying vec2 vUv;
-varying vec3 vNormal;
-varying vec3 vWorldPosition;
+varying vec2  vUv;
+varying vec3  vNormal;
+varying vec3  vWorldPosition;
 varying float vSunDot;
 
-// ── Noise functions ──
-float hash(vec2 p) {
-  p = fract(p * vec2(234.34, 435.345));
-  p += dot(p, p + 34.23);
-  return fract(p.x * p.y);
-}
-
-float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(
-    mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
-    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x),
-    f.y
-  );
-}
-
-float fbm(vec2 p) {
-  float v = 0.0;
-  float a = 0.5;
-  for (int i = 0; i < 6; i++) {
-    v += a * noise(p);
-    p = p * 2.1 + vec2(1.7, 9.2);
-    a *= 0.5;
-  }
-  return v;
-}
-
 void main() {
-  vec2 uv = vUv;
+  // ── 1. Base textures ────────────────────────────────────────
+  vec3  dayColor   = texture2D(u_dayMap,   vUv).rgb;
+  vec3  nightColor = texture2D(u_nightMap, vUv).rgb;
 
-  // ── Procedural continent mask ──
-  float continent = fbm(uv * vec2(8.0, 5.0) + vec2(2.3, 0.7));
-  continent += fbm(uv * vec2(16.0, 10.0) + vec2(5.1, 3.2)) * 0.3;
-  float landMask = smoothstep(0.42, 0.52, continent);
+  // ── 1b. Compute ocean mask from day texture ─────────────────
+  // Ocean pixels are dark blue — low red channel relative to blue
+  float specMask = 1.0 - smoothstep(0.0, 0.3, dayColor.r - dayColor.b);
+  // Also check overall darkness (deep ocean is very dark)
+  float dayLum = dot(dayColor, vec3(0.299, 0.587, 0.114));
+  specMask *= smoothstep(0.05, 0.25, dayLum);
 
-  // ── Ice caps at poles ──
-  float polar = abs(uv.y - 0.5) * 2.0;
-  float iceCap = smoothstep(0.82, 0.95, polar);
+  // ── 2. Terminator (soft day/night boundary) ─────────────────
+  float terminator     = smoothstep(-0.08, 0.14, vSunDot);
+  float terminatorEdge = smoothstep(-0.01, 0.01, vSunDot) * 0.15;
+  terminator = clamp(
+    terminator + terminatorEdge * (1.0 - terminator),
+    0.0, 1.0
+  );
 
-  // ── Day colors ──
-  vec3 oceanDeep = vec3(0.02, 0.08, 0.22);
-  vec3 oceanShallow = vec3(0.05, 0.18, 0.42);
-  vec3 oceanColor = mix(oceanDeep, oceanShallow, fbm(uv * 12.0) * 0.5 + 0.5);
+  // ── 3. Night side: city lights with warm amber tint ─────────
+  vec3 cityLights = nightColor * vec3(1.0, 0.82, 0.48) * 2.2;
+  float cityBrightness = dot(nightColor, vec3(0.33));
+  cityLights += nightColor * smoothstep(0.15, 0.6, cityBrightness) * 0.8;
 
-  vec3 landGreen = vec3(0.08, 0.28, 0.06);
-  vec3 landBrown = vec3(0.35, 0.22, 0.08);
-  vec3 landDesert = vec3(0.55, 0.42, 0.22);
-  float landVariation = fbm(uv * vec2(20.0, 12.0) + 1.5);
-  vec3 landColor = mix(landGreen, landBrown, landVariation);
-  landColor = mix(landColor, landDesert, smoothstep(0.55, 0.75, landVariation));
+  // ── 4. Day side: color grading for altis.to tone ────────────
+  vec3 gradedDay = dayColor;
+  // Boost saturation on water (low red relative to blue = water)
+  float isWater = 1.0 - smoothstep(0.0, 0.3, dayColor.r - dayColor.b);
+  gradedDay = mix(
+    gradedDay,
+    gradedDay * vec3(0.85, 0.95, 1.12),
+    isWater * 0.4
+  );
+  // Slight global contrast curve
+  gradedDay = pow(gradedDay, vec3(0.92)) * 1.08;
 
-  vec3 iceColor = vec3(0.85, 0.9, 0.95);
+  // ── 5. Blend day + night ────────────────────────────────────
+  vec3 baseColor = mix(cityLights, gradedDay, terminator);
 
-  vec3 dayColor = mix(oceanColor, landColor, landMask);
-  dayColor = mix(dayColor, iceColor, iceCap);
+  // ── 6. Ocean specular (Phong, ocean-masked) ─────────────────
+  vec3  viewDir  = normalize(u_cameraPosition - vWorldPosition);
+  vec3  reflDir  = reflect(-normalize(u_sunDirection), vNormal);
+  float spec     = pow(max(dot(viewDir, reflDir), 0.0), 220.0);
+  spec          *= specMask * terminator * 2.5;
+  vec3  specular = vec3(0.6, 0.82, 1.0) * spec;
 
-  // ── Night side: procedural city lights ──
-  float cityNoise = fbm(uv * vec2(60.0, 30.0));
-  float cityDots = smoothstep(0.72, 0.78, cityNoise) * landMask;
-  // Cluster lights near coasts (where continent edges are)
-  float coastProximity = smoothstep(0.1, 0.0, abs(continent - 0.47));
-  cityDots += smoothstep(0.65, 0.75, fbm(uv * vec2(80.0, 40.0) + 3.0)) * coastProximity * 0.6;
-  cityDots = clamp(cityDots, 0.0, 1.0);
-  vec3 nightColor = vec3(0.9, 0.7, 0.3) * cityDots * 1.5;
-  nightColor += vec3(0.005, 0.008, 0.02); // faint ambient on night side
-
-  // ── Day/night terminator ──
-  float terminatorBlend = smoothstep(-0.10, 0.12, vSunDot);
-  vec3 baseColor = mix(nightColor, dayColor, terminatorBlend);
-
-  // ── Ocean specular (Phong, day side only) ──
-  float isOcean = 1.0 - landMask;
-  vec3 viewDir = normalize(cameraPosition - vWorldPosition);
-  vec3 reflDir = reflect(-u_sunDirection, normalize(vNormal));
-  float specular = pow(max(dot(viewDir, reflDir), 0.0), 120.0);
-  specular *= isOcean * terminatorBlend;
-  vec3 specColor = vec3(0.6, 0.8, 1.0) * specular * 1.5;
-  baseColor += specColor;
-
-  // ── Atmospheric haze at low altitude (dive effect) ──
-  vec3 hazeColor = vec3(0.9, 0.75, 0.45);
-  float hazeAmount = (1.0 - u_altitude) * 0.35;
+  // ── 7. Altitude haze (dive effect) ─────────────────────────
+  vec3  hazeColor  = vec3(0.72, 0.85, 1.0);
+  float hazeAmount = pow(1.0 - u_altitude, 2.2) * 0.45;
   baseColor = mix(baseColor, hazeColor, hazeAmount);
 
-  gl_FragColor = vec4(baseColor, 1.0);
+  // ── 8. Limb darkening (subsurface scatter approximation) ───
+  float limbDark = 1.0 - pow(1.0 - max(vSunDot, 0.0), 3.5) * 0.25;
+  baseColor *= limbDark;
+
+  gl_FragColor = vec4(baseColor + specular, 1.0);
 }
 `;

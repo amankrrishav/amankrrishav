@@ -10,8 +10,11 @@ import SkillsPlanets from "./SkillsPlanets";
 import TimelineConstellation from "./TimelineConstellation";
 import PassionsPhenomena from "./PassionsPhenomena";
 import PhotographyGlobe from "./PhotographyGlobe";
+import { useUniverse } from "@/stores/useUniverse";
 
 export default function Scene() {
+  const scrollProgress = useUniverse((s) => s.scrollProgress);
+
   return (
     <div className="canvas-layer">
       <Canvas
@@ -48,8 +51,10 @@ export default function Scene() {
         {/* Passions section: 6 cosmic shader phenomena */}
         <PassionsPhenomena />
 
-        {/* Photography section: 3D Earth globe */}
-        <PhotographyGlobe />
+        {/* Photography section: 3D Earth globe — conditional mount */}
+        {scrollProgress > 0.88 && scrollProgress < 1.25 && (
+          <PhotographyGlobe />
+        )}
 
         {/* Scroll-driven camera */}
         <CameraRig />

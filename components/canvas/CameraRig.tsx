@@ -60,6 +60,7 @@ export default function CameraRig() {
     const timelineActive = useUniverse.getState().timelineSectionActive;
     const passionsActive = useUniverse.getState().passionsSectionActive;
     const photographyActive = useUniverse.getState().photographyActive;
+    const warpIntensity = useUniverse.getState().warpIntensity;
 
     // Yield control to section-specific camera controllers
     if (skillsActive || timelineActive || passionsActive || photographyActive) return;
@@ -82,7 +83,15 @@ export default function CameraRig() {
       pos.z += Math.sin(breathe * 0.2) * 0.08;
     }
 
-    camera.position.copy(pos);
+    // Warp exit acceleration: multiply displacement when warpIntensity > 0
+    if (warpIntensity > 0) {
+      const delta = pos.clone().sub(camera.position);
+      delta.multiplyScalar(1 + warpIntensity * 6);
+      camera.position.add(delta);
+    } else {
+      camera.position.copy(pos);
+    }
+
     camera.lookAt(look);
   });
 

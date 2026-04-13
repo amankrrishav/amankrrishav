@@ -7,6 +7,12 @@ interface StarScreenPos {
   visible: boolean;
 }
 
+interface PinScreenPos {
+  x: number;
+  y: number;
+  visible: boolean;
+}
+
 interface UniverseState {
   /** Scroll progress from 0 (top) to 1 (bottom) */
   scrollProgress: number;
@@ -50,6 +56,8 @@ interface UniverseState {
   hoveredPinId: string | null;
   dynamicPins: PhotoPin[];
   warpIntensity: number;
+  pinScreenPositions: Record<string, PinScreenPos>;
+  displayCoords: { lat: number; lng: number };
 
   // Actions
   setScrollProgress: (progress: number) => void;
@@ -72,6 +80,8 @@ interface UniverseState {
   setHoveredPinId: (id: string | null) => void;
   addPhotographyPin: (pin: PhotoPin) => void;
   setWarpIntensity: (v: number) => void;
+  setPinScreenPositions: (positions: Record<string, PinScreenPos>) => void;
+  setDisplayCoords: (coords: { lat: number; lng: number }) => void;
 }
 
 export const useUniverse = create<UniverseState>((set) => ({
@@ -94,6 +104,8 @@ export const useUniverse = create<UniverseState>((set) => ({
   hoveredPinId: null,
   dynamicPins: [],
   warpIntensity: 0,
+  pinScreenPositions: {},
+  displayCoords: { lat: 12.9716, lng: 77.5946 },
 
   setScrollProgress: (progress) => set({ scrollProgress: progress }),
   setBootComplete: (complete) => set({ bootComplete: complete }),
@@ -117,6 +129,10 @@ export const useUniverse = create<UniverseState>((set) => ({
   setDiveReversing: (reversing) => set({ diveReversing: reversing }),
   setActivePinId: (id) => set({ activePinId: id }),
   setHoveredPinId: (id) => set({ hoveredPinId: id }),
-  addPhotographyPin: (pin) => set((state) => ({ dynamicPins: [...state.dynamicPins, pin] })),
+  addPhotographyPin: (pin) =>
+    set((state) => ({ dynamicPins: [...state.dynamicPins, pin] })),
   setWarpIntensity: (v) => set({ warpIntensity: v }),
+  setPinScreenPositions: (positions) =>
+    set({ pinScreenPositions: positions }),
+  setDisplayCoords: (coords) => set({ displayCoords: coords }),
 }));
